@@ -28,7 +28,7 @@ const MovieCard = ({ movie: {title, vote_average,poster_path,release_date,origin
             {release_date ? release_date.split('-')[0] : 'N/A'}
         </p>
 
-        <span>•</span>
+        
 
         <p></p>
         </div>
