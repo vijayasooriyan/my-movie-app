@@ -127,29 +127,20 @@ const loadTrendingMovies = async () => {
 
       </header>
 
-      {trendingMovies.length > 0 && (
-        <section className="trending">
-          <h2 className="">Trending Movies</h2>
-          
-           {trendingMovies.length > 0 && (
+        {trendingMovies.length > 0 && (
           <section className="trending">
             <h2>Trending Movies</h2>
 
             <ul>
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
-                  <p>{index + 1}</p>
+                  <p>{index+1}</p>
                   <img src={movie.poster_url} alt={movie.title} />
                 </li>
               ))}
             </ul>
           </section>
         )}
-            
-
-        </section>
-      )}
-     
 
       <section className="all-movies">
         <h2>All Movies</h2>
