@@ -1,53 +1,59 @@
-import { ID, Query, Client, Databases } from "appwrite";
+import { Client, Databases, Account } from "appwrite";
 
-const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; 
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
+const client = new Client();
 
-const client = new Client()
-  .setEndpoint("https://cloud.appwrite.io/v1")
-  .setProject(PROJECT_ID);
+// Read environment variables (Vite exposes them via import.meta.env)
+const APPWRITE_ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT;
+const APPWRITE_PROJECT = import.meta.env.VITE_APPWRITE_PROJECT;
 
-const database = new Databases(client);
-export const updateSearchCount = async (searchTerm, movie) => {
-  // 1. Use Appwrite SDK to check if the search term exists in the database
- try {
-  const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-    Query.equal('searchTerm', searchTerm),
-  ])
+if (typeof APPWRITE_ENDPOINT === "string" && APPWRITE_ENDPOINT.length > 0) {
+  client.setEndpoint(APPWRITE_ENDPOINT);
+} else {
+  console.warn(
+    "VITE_APPWRITE_ENDPOINT is not set. Appwrite client endpoint not configured."
+  );
+}
 
-  // 2. If it does, update the count
-  if(result.documents.length > 0) {
-   const doc = result.documents[0];
+if (typeof APPWRITE_PROJECT === "string" && APPWRITE_PROJECT.length > 0) {
+  client.setProject(APPWRITE_PROJECT);
+} else {
+  console.warn(
+    "VITE_APPWRITE_PROJECT is not set. Appwrite client project not configured."
+  );
+}
 
-   await database.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id, {
-    count: doc.count + 1,
-   })
-  // 3. If it doesn't, create a new document with the search term and count as 1
-  } else {
-   await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
-    searchTerm,
-    count: 1,
-    movie_id: movie.id,
-    poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-   })
+const databases = new Databases(client);
+const account = new Account(client);
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const TRENDING_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TRENDING_ID;
+
+// Save search to Appwrite (optional)
+export async function updateSearchCount(query) {
+  try {
+    return await databases.createDocument(
+      DATABASE_ID,
+      TRENDING_COLLECTION_ID,
+      "unique()",
+      { query }
+    );
+  } catch (error) {
+    console.log("Appwrite Error (updateSearchCount):", error);
   }
- } catch (error) {
-  console.error(error);
- }
 }
 
-
-// GET TRENDING MOVIES
-export const getTrendingMovies = async () => {
- try {
-  const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-    Query.limit(5),
-    Query.orderDesc("count")
-  ])
-
-  return result.documents;
- } catch (error) {
-  console.error(error);
- }
+// Get trending movies (just dummy Appwrite function)
+export async function getTrendingMovies() {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID,
+      TRENDING_COLLECTION_ID
+    );
+    return response.documents;
+  } catch (error) {
+    console.log("Appwrite Error (getTrendingMovies):", error);
+    return [];
+  }
 }
+
+export { account, databases, client };
