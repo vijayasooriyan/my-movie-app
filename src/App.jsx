@@ -1,8 +1,11 @@
-import React from 'react'
 import  { useEffect, useState } from "react";
 import Search from './components/Search.jsx'
 import LoadingSpinner from './components/Spinner.jsx';
 import MovieCard from './components/MovieCard.jsx'
+import { useDebounce } from 'react-use';
+import { updateSearchCount , getTrendingMovies } from './appwrite.js';
+
+
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -20,13 +23,22 @@ const API_OPTIONS = {
 
 
 const App = () =>  {
+
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
   const [searchTerm, setSearchTerm] = useState('');
+
+  const[movieList, setMovieList] = useState([]); 
 
   const[errorMessage, setErrorMessage] = useState('');
 
-  const[movieList, setMovieList] = useState([]);
-
   const[isLoading, setIsLoading] = useState(false);
+
+  const [trendingMovies, setTrendingMovies] = useState([]);
+
+
+  //prevent from too many api search key calls
+  useDebounce( () =>  setDebouncedSearchTerm(searchTerm) , 500, [searchTerm] );
 
 const fetchMovies = async(query = '')=> {
 
@@ -37,6 +49,7 @@ const fetchMovies = async(query = '')=> {
       const endpoint = query 
       ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&with_original_language=ta` 
       : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&with_original_language=ta`;
+      
       const response = await fetch(endpoint, API_OPTIONS);
 
       if(!response.ok) {
@@ -44,12 +57,19 @@ const fetchMovies = async(query = '')=> {
       }
       
       const data = await response.json();
+
+
       if(data.Response === "False") {
         setErrorMessage(data.status_message || 'An error occurred while fetching movies.');
         setMovieList([]);
         return;
       }
+
       setMovieList(data.results || []);
+      
+      if(query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
 
     } catch (error) {
       console.error(`Error fetching movies:  ${error} `);
@@ -61,9 +81,24 @@ const fetchMovies = async(query = '')=> {
   };
 
 
+const loadTrendingMovies = async () => {
+    try {
+      const movies = await getTrendingMovies();
+
+      setTrendingMovies(movies);
+    } catch (error) {
+      console.error(`Error fetching trending movies: ${error}`);
+    }
+  }
+
   useEffect( () => {
-    fetchMovies(searchTerm);
-  },[searchTerm]);
+    fetchMovies(debouncedSearchTerm);
+  },[debouncedSearchTerm] );
+
+  useEffect( () => {
+    loadTrendingMovies();
+  }, [] );
+
 
   return (
     <main>
@@ -72,19 +107,39 @@ const fetchMovies = async(query = '')=> {
        
        <div className="wrapper">
         <header>
-          <img src="./hero.png" alt="Hero Banner" />
+          {/* <img src="./hero.png" alt="Hero Banner" /> */}
+        
           
-          <h1>Find <span className='text-gradient'>Movies</span> You'll Enjoy Without the hassle </h1>
+          <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy Without the hassle </h1>
         
        
       
       <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       </header>
+
+       {trendingMovies.length > 0 && (
+          <section className="trending">
+            <h2>Trending Movies</h2>
+
+
+          <ul>
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <img src={movie.poster_url} alt={movie.title} />
+                </li>
+              ))}
+            </ul>
+
+        </section>
+      )}
      
 
       <section className="all-movies">
-        <h2 className="mt-[20px]">All Movies</h2>
+        <h2>All Movies</h2>
+
+
         {isLoading ? (
           <LoadingSpinner />
         ) : errorMessage ? (
