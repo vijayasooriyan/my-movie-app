@@ -55,10 +55,7 @@ A small React app that shows movie search results and tracks trending searches u
 - `src/auth` — login/register and protected route helpers
 
 **Contributing**
-- Open an issue or PR. Keep changes focused and test locally with `npm run dev`.
-
-**License**
-- MIT (or pick a license you prefer)
+- Pull requests and issues are welcome!
 
 If you want, I can:
 - Migrate `src/appwrite.js` to `TablesDB` and update environment notes.
