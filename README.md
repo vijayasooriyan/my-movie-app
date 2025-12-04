@@ -1,16 +1,66 @@
-# React + Vite
+# My Movie App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small React app that shows movie search results and tracks trending searches using Appwrite as the backend.
 
-Currently, two official plugins are available:
+**Why this project**: lightweight starter demonstrating React + Vite + Appwrite integration for storing search counts and trending items.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Features**
+- Search for movies (TMDB image links used for posters)
+- Track search counts and show top trending searches
+- Simple authentication (Appwrite `Account`)
 
-## React Compiler
+**Prerequisites**
+- Node.js (>= 18 recommended)
+- npm or yarn
+- An Appwrite project with Database/Tables configured (see Env variables)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Quick Start**
+1. Install dependencies:
 
-## Expanding the ESLint configuration
+	`npm install`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. Create a `.env` or set environment variables (Vite uses `VITE_` prefix). Required variables used in the project:
+
+	- `VITE_APPWRITE_ENDPOINT` - Your Appwrite endpoint (e.g. `https://cloud.appwrite.io/v1`)
+	- `VITE_APPWRITE_PROJECT` - Appwrite project ID
+	- `VITE_APPWRITE_DATABASE_ID` - Database ID
+	- `VITE_APPWRITE_TRENDING_ID` - Collection ID (or table ID if migrated)
+
+	Example (in `.env`):
+
+	`VITE_APPWRITE_ENDPOINT=https://your-appwrite.example/v1`
+	`VITE_APPWRITE_PROJECT=your_project_id`
+	`VITE_APPWRITE_DATABASE_ID=your_database_id`
+	`VITE_APPWRITE_TRENDING_ID=your_collection_or_table_id`
+
+3. Start the dev server:
+
+	`npm run dev`
+
+4. Open `http://localhost:5173` (or the port shown by Vite).
+
+**Build for production**
+
+`npm run build`
+
+**Appwrite notes & migration**
+- This project currently uses the Appwrite `Databases` (collection/document) methods. The Appwrite SDK types mark those APIs deprecated in favor of the `TablesDB` APIs (`listRows`, `createRow`, `updateRow`, etc.).
+- The code works with the Appwrite SDK in place, but if you prefer to remove deprecation warnings or migrate to Tables:
+  - Create corresponding tables in the Appwrite console (or migrate data)
+  - Replace `Databases` calls with `TablesDB` equivalents and adjust parameter names (`collectionId` → `tableId`, `documentId` → `rowId`, etc.)
+
+**Project structure (important files)**
+- `src/appwrite.js` — Appwrite client and helper functions (search tracking + trending queries)
+- `src/components` — UI components (MovieCard, NavBar, Search, Spinner)
+- `src/auth` — login/register and protected route helpers
+
+**Contributing**
+- Open an issue or PR. Keep changes focused and test locally with `npm run dev`.
+
+**License**
+- MIT (or pick a license you prefer)
+
+If you want, I can:
+- Migrate `src/appwrite.js` to `TablesDB` and update environment notes.
+- Add a sample `.env.example` file or a brief deployment section.
+
