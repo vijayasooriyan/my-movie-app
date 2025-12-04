@@ -49,20 +49,12 @@ A small React app that shows movie search results and tracks trending searches u
   - Create corresponding tables in the Appwrite console (or migrate data)
   - Replace `Databases` calls with `TablesDB` equivalents and adjust parameter names (`collectionId` → `tableId`, `documentId` → `rowId`, etc.)
 
-**🧱 Project Structure**
-src/
-│── appwrite.js        → Appwrite client + trending logic
-│── App.jsx
-│── main.jsx
-│── components/
-│     ├── MovieCard.jsx
-│     ├── Search.jsx
-│     ├── Spinner.jsx
-│     └── Navbar.jsx
-│── auth/
-      ├── Login.jsx
-      ├── Register.jsx
-      └── ProtectedRoute.jsx
+ 
+**Project structure (important files)**
+- `src/appwrite.js` — Appwrite client and helper functions (search tracking + trending queries)
+- `src/components` — UI components (MovieCard, NavBar, Search, Spinner)
+- `src/auth` — login/register and protected route helpers
+
 	  
 **Contributing**
 - Pull requests and issues are welcome!
